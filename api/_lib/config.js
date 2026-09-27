@@ -23,9 +23,14 @@ module.exports = {
   // Revenue answers that get a call ($10K+ a month, same cut-off as the workshop funnel).
   qualified: ["10k-20k", "20k-50k", "50k-plus"],
 
+  // Same wording as `funnel.revenueOptions` / `funnel.bookingQuestions` in profitx-funnel, so both
+  // funnels send Kit the same values. Kit field names on the right of each map's use in api/*.js.
   labels: {
     revenue: { "under-3k": "Just starting / under $3K", "3k-10k": "$3K-$10K", "10k-20k": "$10K-$20K", "20k-50k": "$20K-$50K", "50k-plus": "$50K+" },
-    blocker: { offer: "Offer / competing on price", clients: "Getting clients consistently", delivery: "Delivery bottleneck", retainers: "Retainers don't stick or scale" },
+    work: { "real-estate": "Real estate", brands: "Brands / social content", weddings: "Weddings + commercial", corporate: "Corporate / events", agency: "Agency with a team", other: "Other" },
+    blocker: { offer: "Offer / competing on price, one-off jobs", clients: "Getting clients consistently", delivery: "Delivery: I'm the bottleneck, no team", retainers: "Retainers don't stick or scale", "not-sure": "Not sure, that's why I'm booking" },
+    leads: { referrals: "Referrals / word of mouth", organic: "Organic social", "paid-ads": "Paid ads", cold: "Cold outreach", repeat: "Repeat clients", none: "No steady source" },
+    goal: { "10k-20k": "$10K-$20K", "20k-50k": "$20K-$50K", "50k-85k": "$50K-$85K ($1M a year)", "85k-plus": "$85K+" },
     urgency: { now: "Now, ready to invest", soon: "In the next 1-3 months", exploring: "Just exploring" },
   },
 };

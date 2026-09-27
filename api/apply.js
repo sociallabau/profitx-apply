@@ -5,6 +5,9 @@
 //   KIT_API_KEY (+ KIT_TAG_APPLIED / KIT_TAG_QUALIFIED / KIT_TAG_UNQUALIFIED)  -> Kit subscriber + tags
 //   APPLICATION_WEBHOOK_URL                                                    -> any URL that accepts JSON (Slack, Zapier, Make, GHL)
 // It is always written to the Vercel function logs too (search for APPLICATION).
+//
+// Everyone who applies gets to book a call (no revenue gate) — `qualified` is kept only as
+// extra info on the lead (it also picks which Kit tag they get).
 const { parseApplication } = require("./_lib/application");
 const { upsertSubscriber, tag } = require("./_lib/kit");
 
@@ -14,12 +17,25 @@ async function postJson(url, body) {
   return res.ok;
 }
 
+function kitFields(app) {
+  return {
+    phone: app.phone,
+    business: app.business,
+    monthly_revenue: app.revenueLabel,
+    video_work: app.workLabel,
+    biggest_blocker: app.blockerLabel,
+    lead_source: app.leadsLabel,
+    revenue_goal: app.goalLabel,
+    urgency: app.urgencyLabel,
+  };
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ ok: false });
 
   const app = parseApplication(req.body);
   // Honeypot: real people never fill this hidden field. Pretend it worked.
-  if (app.honeypot) return res.status(200).json({ ok: true, qualified: false });
+  if (app.honeypot) return res.status(200).json({ ok: true });
   if (!app.valid) return res.status(400).json({ ok: false, error: "invalid" });
 
   console.log("APPLICATION", JSON.stringify({ ...app, receivedAt: new Date().toISOString() }));
@@ -28,17 +44,16 @@ module.exports = async function handler(req, res) {
   let delivered = false;
   try {
     if (process.env.KIT_API_KEY) {
-      const ok = await upsertSubscriber({
-        email: app.email,
-        name: app.name,
-        fields: { phone: app.phone, monthly_revenue: app.revenueLabel, biggest_blocker: app.blockerLabel, urgency: app.urgencyLabel },
-      });
+      const ok = await upsertSubscriber({ email: app.email, name: app.name, fields: kitFields(app) });
       await tag(app.email, process.env.KIT_TAG_APPLIED);
       await tag(app.email, app.qualified ? process.env.KIT_TAG_QUALIFIED : process.env.KIT_TAG_UNQUALIFIED);
       if (ok) delivered = true;
     }
     if (process.env.APPLICATION_WEBHOOK_URL) {
-      const text = `New application: ${app.name} (${app.email}, ${app.phone})\n${app.business}\nRevenue: ${app.revenueLabel} | Blocker: ${app.blockerLabel} | Urgency: ${app.urgencyLabel}\n${app.qualified ? "QUALIFIED, picking a call time" : "Not qualified"}`;
+      const text = `New application: ${app.name} (${app.email}, ${app.phone})\n${app.business}\n` +
+        `Revenue: ${app.revenueLabel} | Work: ${app.workLabel} | Blocker: ${app.blockerLabel}\n` +
+        `Leads from: ${app.leadsLabel} | 12mo goal: ${app.goalLabel} | Urgency: ${app.urgencyLabel}\n` +
+        (app.qualified ? "$10K+ a month" : "Under $10K a month");
       if (await postJson(process.env.APPLICATION_WEBHOOK_URL, { text, ...app, honeypot: undefined })) delivered = true;
     }
   } catch (e) {
@@ -46,5 +61,5 @@ module.exports = async function handler(req, res) {
   }
   // A destination is set up but every one failed: let the page say so, so they can retry.
   if (configured && !delivered) return res.status(502).json({ ok: false, error: "delivery" });
-  return res.status(200).json({ ok: true, qualified: app.qualified });
+  return res.status(200).json({ ok: true });
 };

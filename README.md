@@ -2,8 +2,7 @@
 
 One screen, no scroll: headline, one video, an **Apply now** button. One outcome: a booked Gameplan Call.
 
-Flow: Apply now -> 3 questions -> name / email / mobile / business -> pick a time -> booked.
-Applicants under $10K a month are saved as applications but not offered a call (they see a "we'll email you next steps" message).
+Flow: Apply now -> 6 questions -> name / email / mobile / business -> pick a time -> booked. Everyone who applies gets to book a call; the questions (same wording as the workshop funnel) are just extra info on the lead, not a gate.
 
 No framework or build step: `index.html` is the page and `api/` is a handful of small Vercel functions.
 
@@ -13,7 +12,8 @@ Everything you'd edit is in the `CONFIG` block near the bottom of `index.html`:
 headline, sub-line, video embed URL, questions and options, thank-you text, Meta Pixel id.
 
 - **Video:** paste an *embed* URL into `videoUrl` (Wistia `.../embed/iframe/ID`, YouTube `.../embed/ID`, Vimeo `player.vimeo.com/video/ID`).
-- **Who gets a call:** `qualified` in `api/_lib/config.js` (currently $10K+ a month, same as the workshop funnel).
+- **Questions:** the `questions` array in `index.html`'s `CONFIG`. They match the workshop funnel's wording (`revenueOptions` + `bookingQuestions` in `profitx-funnel/src/config/funnel.ts`) so both funnels send Kit the same values.
+- **"Qualified" tag only, no gate:** `qualified` in `api/_lib/config.js` ($10K+ a month) just picks the Kit tag and shows up in the webhook text — it doesn't stop anyone from booking. Remove `app.qualified` from `api/apply.js` / `api/book.js` if you don't want that tag either.
 - **Call times, length, days:** `api/_lib/config.js`. It mirrors `funnel.booking` in `profitx-funnel`, so change both together.
 
 ## Calendar (same as the workshop funnel)
@@ -23,11 +23,9 @@ Bookings use the same Google Calendar setup as `profitx-funnel`: they check free
 ## Where applications go
 
 - **Google Calendar:** every booked call.
-- **Kit** (`KIT_API_KEY` + tag ids): every applicant, with phone, monthly revenue, blocker and urgency (the workshop funnel's field names). Tags: applied, qualified / unqualified, booked.
+- **Kit** (`KIT_API_KEY` + tag ids): every applicant, with phone, business, monthly revenue, video work, blocker, lead source, 12-month goal and urgency — the same custom field names the workshop funnel uses (plus a new `business` field; create it in Kit before sending real traffic, or that one value is silently dropped). Tags: applied, qualified / unqualified, booked.
 - **`APPLICATION_WEBHOOK_URL`** (optional): posts each application and booking as JSON to Slack / Zapier / Make / GHL.
 - **Vercel logs:** every application is also logged as `APPLICATION` as a safety net.
-
-The business / website / Instagram answer goes to the calendar event, the webhook and the logs. To keep it in Kit too, create a `business_link` custom field there and add it to `fields` in `api/apply.js` and `api/book.js`.
 
 ## Run and deploy
 
