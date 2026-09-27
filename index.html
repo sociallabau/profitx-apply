@@ -6,7 +6,7 @@
 <title>Apply | ProfitX</title>
 <meta name="description" content="Watch the short video, then apply.">
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23161014'/%3E%3Ctext x='16' y='23' font-family='Arial' font-weight='900' font-size='20' text-anchor='middle' fill='%23B98BFF'%3EX%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='body' x1='8' y1='4' x2='56' y2='60' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%23B066FF'/%3E%3Cstop offset='0.5' stop-color='%238536F5'/%3E%3Cstop offset='1' stop-color='%234C17C2'/%3E%3C/linearGradient%3E%3ClinearGradient id='letter' x1='32' y1='14' x2='32' y2='50' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%23FFFFFF'/%3E%3Cstop offset='1' stop-color='%23EDE3FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='2' y='2' width='60' height='60' rx='17' fill='url(%23body)'/%3E%3Cpath transform='translate(32 32) skewX(-9) translate(-34.5 -32)' fill='url(%23letter)' fill-rule='evenodd' d='M20 13.5 H36.5 A12.25 12.25 0 0 1 36.5 38 H29.6 V50.5 H20 Z M29.6 21.8 H35.6 A4.35 4.35 0 0 1 35.6 30.5 H29.6 Z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,800&display=swap" rel="stylesheet">
@@ -26,10 +26,12 @@
   /* One screen, no scroll: everything sits in a column that fills the viewport. */
   .screen{height:100dvh;display:flex;flex-direction:column;align-items:center;text-align:center;
     padding:max(18px,env(safe-area-inset-top)) 20px max(14px,env(safe-area-inset-bottom));gap:clamp(10px,2.2dvh,22px)}
-  .brand{font-weight:900;font-size:22px;letter-spacing:-.03em}
-  .brand span{color:var(--purple)}
-  h1{margin:0;font-weight:800;font-style:italic;letter-spacing:-.035em;line-height:1.02;
-    font-size:clamp(1.7rem,5.2vw,3.4rem);max-width:20ch;text-wrap:balance}
+  .brand{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:20px;letter-spacing:-.03em}
+  .brand .mark{width:26px;height:26px;border-radius:8px;flex:none}
+  .brand span{color:var(--violet)}
+  h1{margin:0;font-weight:900;text-transform:uppercase;letter-spacing:-.035em;line-height:.96;
+    font-size:clamp(1.7rem,5.4vw,3.2rem);max-width:19ch;text-wrap:balance}
+  h1 .v{color:var(--violet)}
   .sub{margin:0;font-size:clamp(.95rem,2vw,1.15rem);font-weight:500;color:var(--body)}
 
   /* The video takes whatever height is left and keeps 16:9. */
@@ -95,7 +97,10 @@
 <body>
 
 <main class="screen">
-  <div class="brand" id="brand"></div>
+  <div class="brand" id="brand">
+    <svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="body" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#B066FF"/><stop offset="0.5" stop-color="#8536F5"/><stop offset="1" stop-color="#4C17C2"/></linearGradient><linearGradient id="letter" x1="32" y1="14" x2="32" y2="50" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EDE3FF"/></linearGradient></defs><rect x="2" y="2" width="60" height="60" rx="17" fill="url(#body)"/><path transform="translate(32 32) skewX(-9) translate(-34.5 -32)" fill="url(#letter)" fill-rule="evenodd" d="M20 13.5 H36.5 A12.25 12.25 0 0 1 36.5 38 H29.6 V50.5 H20 Z M29.6 21.8 H35.6 A4.35 4.35 0 0 1 35.6 30.5 H29.6 Z"/></svg>
+    <span id="brand-text"></span>
+  </div>
   <h1 id="headline"></h1>
   <p class="sub" id="sub"></p>
 
@@ -117,8 +122,8 @@
 /* ============ EDIT ME: everything you'd change lives in this block ============ */
 const CONFIG = {
   brand: "Profit<span>X</span>",
-  headline: "Turn one-off shoots into a $20K month.",
-  sub: "Watch this short video, then apply.",
+  headline: 'The simplest way to add <span class="v">$20k/mth</span> to your video business',
+  sub: "Watch the video below",
   note: "Takes about a minute.",
 
   // Paste an EMBED url (not the share link). Wistia: https://fast.wistia.net/embed/iframe/XXXX
@@ -175,8 +180,8 @@ let applicant = null; // name, email, phone, business, saved after the details s
 let busy = false;
 
 // ---- static content
-$("brand").innerHTML = CONFIG.brand;
-$("headline").textContent = CONFIG.headline;
+$("brand-text").innerHTML = CONFIG.brand;
+$("headline").innerHTML = CONFIG.headline;
 $("sub").textContent = CONFIG.sub;
 $("note").textContent = CONFIG.note;
 $("privacy").href = CONFIG.privacyUrl;
