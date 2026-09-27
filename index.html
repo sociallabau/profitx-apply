@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Apply | ProfitX</title>
+<meta name="description" content="Watch the short video, then apply.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23161014'/%3E%3Ctext x='16' y='23' font-family='Arial' font-weight='900' font-size='20' text-anchor='middle' fill='%23B98BFF'%3EX%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#161014; --paper:#FBF7F1; --canvas:#E9E1D2; --white:#fff;
+    --violet:#8536F5; --violet-hover:#7127DB; --purple:#3A1C7A;
+    --body:#2A2230; --muted:#7d7263; --line:#E6DCC8; --tint:#E9DEFB; --red-b:#C13B33;
+    --font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  button{font:inherit;cursor:pointer}
+  :focus-visible{outline:3px solid var(--violet);outline-offset:3px}
+
+  /* One screen, no scroll: everything sits in a column that fills the viewport. */
+  .screen{height:100dvh;display:flex;flex-direction:column;align-items:center;text-align:center;
+    padding:max(18px,env(safe-area-inset-top)) 20px max(14px,env(safe-area-inset-bottom));gap:clamp(10px,2.2dvh,22px)}
+  .brand{font-weight:900;font-size:22px;letter-spacing:-.03em}
+  .brand span{color:var(--purple)}
+  h1{margin:0;font-weight:800;font-style:italic;letter-spacing:-.035em;line-height:1.02;
+    font-size:clamp(1.7rem,5.2vw,3.4rem);max-width:20ch;text-wrap:balance}
+  .sub{margin:0;font-size:clamp(.95rem,2vw,1.15rem);font-weight:500;color:var(--body)}
+
+  /* The video takes whatever height is left and keeps 16:9. */
+  .stage{flex:1;min-height:0;width:100%;display:grid;place-items:center;container-type:size}
+  .video{width:min(100cqw,calc(100cqh * 16 / 9));aspect-ratio:16/9;border-radius:14px;overflow:hidden;position:relative;
+    background:radial-gradient(120% 90% at 30% 20%,#2b1a44 0%,var(--ink) 70%);
+    box-shadow:0 18px 50px rgba(40,28,12,.22);display:grid;place-items:center;color:var(--white)}
+  .video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .video .play{width:72px;height:72px;border-radius:50%;background:var(--violet);display:grid;place-items:center;box-shadow:0 0 0 10px rgba(133,54,245,.25)}
+  .video .play::before{content:"";margin-left:6px;border-left:22px solid var(--white);border-top:14px solid transparent;border-bottom:14px solid transparent}
+  .video .tag{position:absolute;top:12px;left:14px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;background:rgba(255,255,255,.12);padding:5px 9px;border-radius:6px}
+
+  .cta{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--violet);color:var(--white);border:0;border-radius:999px;
+    padding:15px 34px;font-weight:800;font-size:16px;letter-spacing:.04em;text-transform:uppercase;
+    box-shadow:0 6px 0 var(--purple);transition:transform .12s,box-shadow .12s,background .12s}
+  .cta:hover:not(:disabled){background:var(--violet-hover);transform:translateY(-1px);box-shadow:0 7px 0 var(--purple)}
+  .cta:active:not(:disabled){transform:translateY(4px);box-shadow:0 2px 0 var(--purple)}
+  .cta:disabled{opacity:.5;cursor:default}
+  .cta.wide{width:100%}
+  .cta .arr{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--white);color:var(--violet);font-size:13px}
+  .note{margin:-4px 0 0;font-size:13px;color:var(--muted);font-weight:500}
+  .legal{font-size:11.5px;color:var(--muted)}
+  .legal a{color:inherit}
+
+  /* Application pop-up */
+  .modal-bg{position:fixed;inset:0;background:rgba(22,16,20,.72);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+  .modal-bg[hidden]{display:none}
+  .modal{position:relative;background:var(--paper);border-radius:16px;width:100%;max-width:480px;max-height:100%;overflow-y:auto;
+    padding:34px 22px 22px;text-align:left;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+  .x{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--white);border:0;font-weight:800;line-height:1;font-size:18px}
+  .step-label{margin:0 0 6px;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .q{margin:0 0 18px;font-weight:800;font-style:italic;letter-spacing:-.02em;line-height:1.15;font-size:clamp(1.3rem,4.4vw,1.7rem)}
+  .opts{display:grid;gap:8px}
+  .opt{border:1.5px solid var(--ink);background:var(--white);color:var(--ink);border-radius:10px;padding:13px 14px;font-weight:600;font-size:15px;text-align:left}
+  .opt:hover{background:var(--tint);border-color:var(--violet)}
+  .opt[aria-pressed="true"]{background:var(--ink);color:var(--white)}
+  .field{display:block;margin-bottom:12px}
+  .field span{display:block;font-size:13px;font-weight:700;margin-bottom:5px}
+  .field input{width:100%;border:1.5px solid var(--ink);border-radius:10px;padding:12px 14px;font:inherit;font-size:16px;background:var(--white);color:var(--ink)}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+  .back{background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:14px;font-weight:600;padding:8px 0 0}
+  .err{color:var(--red-b);font-size:14px;font-weight:600;margin:0 0 10px}
+  .fine{font-size:11.5px;color:var(--body);margin:10px 0 14px}
+  .done{text-align:center;padding:10px 0}
+  .done .tick{width:56px;height:56px;border-radius:50%;background:var(--violet);color:var(--white);display:grid;place-items:center;margin:0 auto 14px;font-size:28px;font-weight:800}
+  .done p{margin:8px 0 0;color:var(--body)}
+  .done .when{font-weight:800;font-size:18px;color:var(--ink)}
+
+  /* Time picker */
+  .tz{margin:-8px 0 14px;font-size:13px;color:var(--muted);font-weight:500}
+  .days{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .day{border:1.5px solid var(--ink);background:var(--white);color:var(--ink);border-radius:10px;padding:9px 12px;font-weight:700;font-size:14px;line-height:1.2;text-align:center}
+  .day small{display:block;font-weight:600;font-size:12px;color:var(--muted)}
+  .day[aria-pressed="true"]{background:var(--ink);color:var(--white)}
+  .day[aria-pressed="true"] small{color:#cfc6d6}
+  .times{grid-template-columns:repeat(3,1fr);margin-bottom:16px}
+  .times .opt{text-align:center;padding:12px 6px}
+  .loading{color:var(--muted);font-weight:600;padding:16px 0}
+
+  @media (max-height:520px){ .sub,.note,.legal{display:none} }
+</style>
+</head>
+<body>
+
+<main class="screen">
+  <div class="brand" id="brand"></div>
+  <h1 id="headline"></h1>
+  <p class="sub" id="sub"></p>
+
+  <div class="stage"><div class="video" id="video"></div></div>
+
+  <button class="cta" id="apply" type="button">Apply now <span class="arr" aria-hidden="true">→</span></button>
+  <p class="note" id="note"></p>
+  <div class="legal"><a id="privacy" href="#">Privacy</a> · <a id="terms" href="#">Terms</a></div>
+</main>
+
+<div class="modal-bg" id="modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="q-title">
+    <button class="x" id="close" type="button" aria-label="Close application">×</button>
+    <div id="body"></div>
+  </div>
+</div>
+
+<script>
+/* ============ EDIT ME: everything you'd change lives in this block ============ */
+const CONFIG = {
+  brand: "Profit<span>X</span>",
+  headline: "Turn one-off shoots into a $20K month.",
+  sub: "Watch this short video, then apply.",
+  note: "Takes about a minute.",
+
+  // Paste an EMBED url (not the share link). Wistia: https://fast.wistia.net/embed/iframe/XXXX
+  // YouTube: https://www.youtube.com/embed/XXXX  Vimeo: https://player.vimeo.com/video/XXXX
+  // Empty = placeholder.
+  videoUrl: "",
+
+  // Meta Pixel id. Empty = no tracking. Fires PageView on load, Lead when someone applies,
+  // and Schedule when they book a call.
+  pixelId: "",
+
+  privacyUrl: "https://profitx-funnel.vercel.app/privacy",
+  termsUrl: "https://profitx-funnel.vercel.app/terms",
+
+  // One question per screen. `value` is what gets saved; `label` is what they see.
+  // The revenue values must match `qualified` in api/_lib/config.js ($10K+ gets a call).
+  questions: [
+    { id: "revenue", title: "What's your monthly revenue right now?", options: [
+      { value: "under-3k", label: "Just starting / under $3K" },
+      { value: "3k-10k", label: "$3K–$10K" },
+      { value: "10k-20k", label: "$10K–$20K" },
+      { value: "20k-50k", label: "$20K–$50K" },
+      { value: "50k-plus", label: "$50K+" },
+    ] },
+    { id: "blocker", title: "What's holding you back the most?", options: [
+      { value: "offer", label: "My offer: competing on price, one-off jobs" },
+      { value: "clients", label: "Getting clients consistently" },
+      { value: "delivery", label: "Delivery: I'm the bottleneck, no team" },
+      { value: "retainers", label: "Retainers that don't stick or don't scale" },
+    ] },
+    { id: "urgency", title: "How ready are you to fix it?", options: [
+      { value: "now", label: "Now, I'm ready to invest" },
+      { value: "soon", label: "In the next 1–3 months" },
+      { value: "exploring", label: "Just exploring" },
+    ] },
+  ],
+
+  text: {
+    pickTime: "Pick a time for your Gameplan Call",
+    booked: { title: "You're booked.", text: "Check your inbox for the calendar invite and accept it, so the meeting link is in your calendar." },
+    // Applied but not eligible for a call (under $10K a month)
+    notYet: { title: "Application received.", text: "Thanks for applying. We'll email you next steps within one business day." },
+    // Applied, but no call times could be loaded
+    noTimes: { title: "Application received.", text: "There are no call times open right now. We'll email you within one business day to book your call." },
+  },
+};
+/* =============================================================================== */
+
+const $ = (id) => document.getElementById(id);
+const answers = {};
+let view = "q";      // q (questions) | details | time | done
+let qIndex = 0;
+let applicant = null; // name, email, phone, business, saved after the details step
+let busy = false;
+
+// ---- static content
+$("brand").innerHTML = CONFIG.brand;
+$("headline").textContent = CONFIG.headline;
+$("sub").textContent = CONFIG.sub;
+$("note").textContent = CONFIG.note;
+$("privacy").href = CONFIG.privacyUrl;
+$("terms").href = CONFIG.termsUrl;
+document.title = "Apply | " + CONFIG.brand.replace(/<[^>]+>/g, "");
+
+// ---- video
+(function () {
+  const box = $("video");
+  if (CONFIG.videoUrl) {
+    const f = document.createElement("iframe");
+    f.src = CONFIG.videoUrl;
+    f.title = "Video";
+    f.allow = "autoplay; fullscreen; picture-in-picture";
+    f.allowFullscreen = true;
+    box.appendChild(f);
+  } else {
+    box.innerHTML = '<span class="tag">Your video here</span><span class="play" aria-hidden="true"></span>';
+  }
+})();
+
+// ---- Meta Pixel (only if an id is set)
+if (CONFIG.pixelId) {
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;
+  s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq("init", CONFIG.pixelId);
+  fbq("track", "PageView");
+}
+const track = (name) => { if (window.fbq) fbq("track", name); };
+
+// ---- modal
+const modal = $("modal");
+const body = $("body");
+let opener = null;
+
+function open() {
+  opener = document.activeElement;
+  view = "q";
+  qIndex = 0;
+  modal.hidden = false;
+  render();
+}
+function close() {
+  modal.hidden = true;
+  if (opener) opener.focus();
+}
+$("apply").addEventListener("click", open);
+$("close").addEventListener("click", close);
+modal.addEventListener("mousedown", (e) => { if (e.target === modal) close(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !modal.hidden) close(); });
+
+const focusFirst = () => { const el = body.querySelector("input:not(.hp), button.opt, button.day"); if (el) el.focus(); };
+
+function render() {
+  if (view === "q") renderQuestion();
+  else if (view === "details") renderDetails();
+  else if (view === "time") renderTime();
+  focusFirst();
+}
+
+function done(msg, when) {
+  view = "done";
+  body.innerHTML = `<div class="done"><div class="tick" aria-hidden="true">✓</div><h2 class="q" id="q-title"></h2><p class="when" hidden></p><p class="msg"></p></div>`;
+  body.querySelector(".q").textContent = msg.title;
+  body.querySelector(".msg").textContent = msg.text;
+  if (when) { const w = body.querySelector(".when"); w.textContent = when; w.hidden = false; }
+}
+
+// ---- 1. questions
+function renderQuestion() {
+  const n = CONFIG.questions.length;
+  const q = CONFIG.questions[qIndex];
+  body.innerHTML =
+    `<p class="step-label">Question ${qIndex + 1} of ${n}</p><h2 class="q" id="q-title"></h2><div class="opts"></div>` +
+    (qIndex > 0 ? `<button class="back" type="button" id="back">Back</button>` : "");
+  body.querySelector(".q").textContent = q.title;
+  const opts = body.querySelector(".opts");
+  q.options.forEach((o) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "opt";
+    b.textContent = o.label;
+    b.addEventListener("click", () => {
+      answers[q.id] = o.value;
+      if (qIndex < n - 1) qIndex++; else view = "details";
+      render();
+    });
+    opts.appendChild(b);
+  });
+  const back = $("back");
+  if (back) back.addEventListener("click", () => { qIndex--; render(); });
+}
+
+// ---- 2. details (saves the application)
+function renderDetails() {
+  const v = applicant || {};
+  body.innerHTML =
+    `<p class="step-label">Nearly there</p><h2 class="q" id="q-title">Where should we send your details?</h2>
+    <form id="form" novalidate>
+      <label class="field"><span>First name</span><input name="name" autocomplete="given-name" required></label>
+      <label class="field"><span>Email</span><input name="email" type="email" autocomplete="email" required></label>
+      <label class="field"><span>Mobile</span><input name="phone" type="tel" autocomplete="tel" required></label>
+      <label class="field"><span>Business name, website or Instagram</span><input name="business" required></label>
+      <input class="hp" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p class="err" id="err" role="alert" hidden></p>
+      <p class="fine">By applying you agree to our <a href="${CONFIG.privacyUrl}" target="_blank" rel="noopener">Privacy Policy</a> and <a href="${CONFIG.termsUrl}" target="_blank" rel="noopener">Terms</a>.</p>
+      <button class="cta wide" id="submit" type="submit">Continue</button>
+    </form>
+    <button class="back" type="button" id="back">Back</button>`;
+  const f = $("form");
+  for (const k of ["name", "email", "phone", "business"]) f.elements[k].value = v[k] || "";
+  $("back").addEventListener("click", () => { view = "q"; qIndex = CONFIG.questions.length - 1; render(); });
+  f.addEventListener("submit", submitDetails);
+}
+
+const post = (url, payload) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+
+async function submitDetails(e) {
+  e.preventDefault();
+  if (busy) return;
+  const data = Object.fromEntries(new FormData(e.target));
+  const err = $("err");
+  const fail = (m) => { err.textContent = m; err.hidden = false; };
+  err.hidden = true;
+
+  if (!data.name.trim() || !data.business.trim()) return fail("Please fill in every field.");
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email.trim())) return fail("That email doesn't look right.");
+  if (data.phone.replace(/\D/g, "").length < 8) return fail("Please add a valid mobile number.");
+
+  busy = true;
+  const btn = $("submit");
+  btn.disabled = true;
+  btn.textContent = "Sending…";
+  try {
+    applicant = { name: data.name.trim(), email: data.email.trim(), phone: data.phone.trim(), business: data.business.trim(), company: data.company };
+    const res = await post("/api/apply", { ...applicant, answers, source: location.search.slice(1, 300) });
+    if (!res.ok) throw new Error();
+    const j = await res.json();
+    track("Lead");
+    if (j.qualified) { view = "time"; render(); } else { done(CONFIG.text.notYet); }
+  } catch {
+    btn.disabled = false;
+    btn.textContent = "Continue";
+    fail("Something went wrong. Please try again.");
+  } finally {
+    busy = false;
+  }
+}
+
+// ---- 3. pick a time (only for qualified applicants)
+const tzName = () => new Intl.DateTimeFormat("en-AU", { timeZoneName: "short" }).formatToParts(new Date()).find((p) => p.type === "timeZoneName")?.value || "";
+const dayKey = (d) => d.toLocaleDateString("en-CA"); // YYYY-MM-DD in the viewer's timezone
+const fmtTime = (d) => d.toLocaleTimeString("en-AU", { hour: "numeric", minute: "2-digit" }).replace(" ", "").toLowerCase();
+const fmtFull = (d) => d.toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long" }) + ", " + fmtTime(d) + " " + tzName();
+
+async function renderTime(notice) {
+  body.innerHTML =
+    `<p class="step-label">Last step</p><h2 class="q" id="q-title"></h2><p class="tz"></p>
+     <div id="loading" class="loading">Loading available times…</div>
+     <div class="days" id="days" role="group" aria-label="Choose a day" hidden></div>
+     <div class="opts times" id="times" role="group" aria-label="Choose a time" hidden></div>
+     <p class="err" id="err" role="alert" hidden></p>
+     <button class="cta wide" id="confirm" type="button" disabled hidden>Confirm booking</button>`;
+  body.querySelector(".q").textContent = CONFIG.text.pickTime;
+  body.querySelector(".tz").textContent = "Times shown in your timezone (" + tzName() + "). 20 minutes on Google Meet.";
+  if (notice) { const e = $("err"); e.textContent = notice; e.hidden = false; }
+
+  let slots = [];
+  try {
+    const res = await fetch("/api/slots", { cache: "no-store" });
+    if (!res.ok) throw new Error();
+    slots = (await res.json()).slots || [];
+  } catch { slots = []; }
+  if (!slots.length) return done(CONFIG.text.noTimes);
+
+  const byDay = new Map();
+  for (const iso of slots) {
+    const d = new Date(iso);
+    const k = dayKey(d);
+    if (!byDay.has(k)) byDay.set(k, { date: d, times: [] });
+    byDay.get(k).times.push({ iso, d });
+  }
+  const dayList = [...byDay.values()];
+  let selDay = dayList[0];
+  let selIso = null;
+
+  $("loading").hidden = true;
+  $("days").hidden = false;
+  $("times").hidden = false;
+  $("confirm").hidden = false;
+
+  const drawDays = () => {
+    $("days").innerHTML = "";
+    dayList.forEach((x) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "day";
+      b.setAttribute("aria-pressed", String(x === selDay));
+      b.innerHTML = `${x.date.toLocaleDateString("en-AU", { weekday: "short" })}<small>${x.date.toLocaleDateString("en-AU", { day: "numeric", month: "short" })}</small>`;
+      b.addEventListener("click", () => { selDay = x; selIso = null; drawDays(); drawTimes(); });
+      $("days").appendChild(b);
+    });
+  };
+  const drawTimes = () => {
+    $("times").innerHTML = "";
+    $("confirm").disabled = !selIso;
+    selDay.times.forEach((t) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt";
+      b.textContent = fmtTime(t.d);
+      b.setAttribute("aria-pressed", String(t.iso === selIso));
+      b.addEventListener("click", () => { selIso = t.iso; drawTimes(); });
+      $("times").appendChild(b);
+    });
+  };
+  drawDays();
+  drawTimes();
+
+  $("confirm").addEventListener("click", async () => {
+    if (busy || !selIso) return;
+    busy = true;
+    const btn = $("confirm");
+    const err = $("err");
+    err.hidden = true;
+    btn.disabled = true;
+    btn.textContent = "Booking…";
+    try {
+      const res = await post("/api/book", { ...applicant, answers, start: selIso });
+      const j = await res.json().catch(() => ({}));
+      if (res.status === 409) { busy = false; return renderTime(j.error || "That time was just taken. Pick another one."); }
+      if (!res.ok) throw new Error(j.error);
+      track("Schedule");
+      done(CONFIG.text.booked, fmtFull(new Date(selIso)));
+    } catch (e2) {
+      btn.disabled = false;
+      btn.textContent = "Confirm booking";
+      err.textContent = e2.message || "Booking failed. Please try again.";
+      err.hidden = false;
+    } finally {
+      busy = false;
+    }
+  });
+}
+</script>
+</body>
+</html>
