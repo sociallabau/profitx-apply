@@ -15,6 +15,9 @@ function parseApplication(body) {
     source: clean(src.source, 300),
     honeypot: clean(src.company, 50),
     start: clean(src.start, 40),
+    eventId: clean(src.eventId, 64),
+    eventSourceUrl: clean(src.eventSourceUrl, 300),
+    fbc: clean(src.fbc, 200),
   };
   for (const id of ANSWER_IDS) {
     app[id] = clean(a[id], id === "work" ? 100 : 30);

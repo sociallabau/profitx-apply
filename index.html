@@ -253,7 +253,7 @@ if (CONFIG.pixelId) {
   fbq("init", CONFIG.pixelId);
   fbq("track", "PageView");
 }
-const track = (name) => { if (window.fbq) fbq("track", name); };
+const track = (name, eventID) => { if (window.fbq) fbq("track", name, {}, eventID ? { eventID } : undefined); };
 
 // ---- modal
 const modal = $("modal");
@@ -384,10 +384,11 @@ async function submitDetails(e) {
   btn.textContent = "Sending…";
   try {
     applicant = { name: data.name.trim(), email: data.email.trim(), phone: data.phone.trim(), business: data.business.trim(), company: data.company };
-    const res = await post("/api/apply", { ...applicant, answers, source: location.search.slice(1, 300) });
+    const eventId = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2));
+    const res = await post("/api/apply", { ...applicant, answers, source: location.search.slice(1, 300), eventId, eventSourceUrl: location.href.split("#")[0] });
     if (!res.ok) throw new Error();
     await res.json();
-    track("Lead");
+    track("Lead", eventId);
     view = "time";
     render();
   } catch {
