@@ -77,6 +77,8 @@
   .field{display:block;margin-bottom:12px}
   .field span{display:block;font-size:13px;font-weight:700;margin-bottom:5px}
   .field input{width:100%;border:1.5px solid var(--ink);border-radius:10px;padding:12px 14px;font:inherit;font-size:16px;background:var(--white);color:var(--ink)}
+  .req{color:var(--red-b)}
+  .field input.bad{border-color:var(--red-b);box-shadow:0 0 0 3px rgba(193,59,51,.18)}
   .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
   .back{background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:14px;font-weight:600;padding:8px 0 0}
   .err{color:var(--red-b);font-size:14px;font-weight:600;margin:0 0 10px}
@@ -335,10 +337,10 @@ function renderDetails() {
   body.innerHTML =
     `<p class="step-label">Nearly there</p><h2 class="q" id="q-title">Where should we send your details?</h2>
     <form id="form" novalidate>
-      <label class="field"><span>First name</span><input name="name" autocomplete="given-name" required></label>
-      <label class="field"><span>Email</span><input name="email" type="email" autocomplete="email" required></label>
-      <label class="field"><span>Mobile</span><input name="phone" type="tel" autocomplete="tel" required></label>
-      <label class="field"><span>Business name, website or Instagram</span><input name="business" required></label>
+      <label class="field"><span>First name <b class="req" aria-hidden="true">*</b></span><input name="name" autocomplete="given-name" required aria-required="true"></label>
+      <label class="field"><span>Email <b class="req" aria-hidden="true">*</b></span><input name="email" type="email" autocomplete="email" required></label>
+      <label class="field"><span>Mobile <b class="req" aria-hidden="true">*</b></span><input name="phone" type="tel" autocomplete="tel" required></label>
+      <label class="field"><span>Business name, website or Instagram <b class="req" aria-hidden="true">*</b></span><input name="business" required></label>
       <input class="hp" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">
       <p class="err" id="err" role="alert" hidden></p>
       <p class="fine">By applying you agree to our <a href="${CONFIG.privacyUrl}" target="_blank" rel="noopener">Privacy Policy</a> and <a href="${CONFIG.termsUrl}" target="_blank" rel="noopener">Terms</a>.</p>
@@ -361,9 +363,20 @@ async function submitDetails(e) {
   const fail = (m) => { err.textContent = m; err.hidden = false; };
   err.hidden = true;
 
-  if (!data.name.trim() || !data.business.trim()) return fail("Please fill in every field.");
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email.trim())) return fail("That email doesn't look right.");
-  if (data.phone.replace(/\D/g, "").length < 8) return fail("Please add a valid mobile number.");
+  const f = e.target.elements;
+  const bad = {
+    name: !data.name.trim(),
+    email: !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email.trim()),
+    phone: data.phone.replace(/\D/g, "").length < 8,
+    business: !data.business.trim(),
+  };
+  for (const k in bad) f[k].classList.toggle("bad", bad[k]);
+  const first = Object.keys(bad).find((k) => bad[k]);
+  if (first) {
+    f[first].focus();
+    const empty = !data[first].trim();
+    return fail(empty ? "Please fill in every field." : first === "email" ? "That email doesn't look right." : "Please add a valid mobile number.");
+  }
 
   busy = true;
   const btn = $("submit");
