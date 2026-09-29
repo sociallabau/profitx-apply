@@ -11,6 +11,7 @@
 const { parseApplication } = require("./_lib/application");
 const { upsertSubscriber, tag } = require("./_lib/kit");
 const { sendLead } = require("./_lib/meta");
+const { emailApplication } = require("./_lib/notify");
 
 async function postJson(url, body) {
   const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -60,7 +61,7 @@ module.exports = async function handler(req, res) {
   } catch (e) {
     console.error("apply: delivery error", e);
   }
-  await sendLead(req, app);
+  await Promise.all([sendLead(req, app), emailApplication(app)]);
   // A destination is set up but every one failed: let the page say so, so they can retry.
   if (configured && !delivered) return res.status(502).json({ ok: false, error: "delivery" });
   return res.status(200).json({ ok: true });
