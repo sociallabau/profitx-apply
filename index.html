@@ -93,6 +93,15 @@
   .times .opt{text-align:center;padding:12px 6px}
   .loading{color:var(--muted);font-weight:600;padding:16px 0}
 
+  /* Phones: stack everything tight instead of stretching the video across the leftover height. */
+  @media (max-width:700px){
+    .screen{justify-content:center;gap:12px}
+    .stage{flex:none;display:block;container-type:normal}
+    .video{width:100%}
+    .note{margin:-2px 0 0}
+    .legal{margin-top:6px}
+  }
+
   @media (max-height:520px){ .sub,.note,.legal{display:none} }
 </style>
 </head>
