@@ -17,7 +17,7 @@ function parseApplication(body) {
     start: clean(src.start, 40),
   };
   for (const id of ANSWER_IDS) {
-    app[id] = clean(a[id], 30);
+    app[id] = clean(a[id], id === "work" ? 100 : 30);
     app[id + "Label"] = b.labels[id]?.[app[id]] || app[id];
   }
   app.valid = !!app.name && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(app.email) && app.phone.replace(/\D/g, "").length >= 8 && !!app.business;

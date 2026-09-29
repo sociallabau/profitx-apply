@@ -68,6 +68,10 @@
   .q{margin:0 0 18px;font-weight:800;font-style:italic;letter-spacing:-.02em;line-height:1.15;font-size:clamp(1.3rem,4.4vw,1.7rem)}
   .opts{display:grid;gap:8px}
   .opt{border:1.5px solid var(--ink);background:var(--white);color:var(--ink);border-radius:10px;padding:13px 14px;font-weight:600;font-size:15px;text-align:left}
+  .write{display:flex;gap:8px}
+  .write input{flex:1;min-width:0;border:1.5px solid var(--ink);border-radius:10px;padding:12px 14px;font:inherit;font-size:16px;background:var(--white);color:var(--ink)}
+  .write .go{background:var(--ink);color:var(--white);text-align:center;white-space:nowrap}
+  .write .go:disabled{opacity:.4;cursor:default}
   .opt:hover{background:var(--tint);border-color:var(--violet)}
   .opt[aria-pressed="true"]{background:var(--ink);color:var(--white)}
   .field{display:block;margin-bottom:12px}
@@ -163,12 +167,13 @@ const CONFIG = {
       { value: "50k-plus", label: "$50K+" },
     ] },
     { id: "work", title: "What kind of video work do you mainly do?", options: [
-      { value: "real-estate", label: "Real estate" },
-      { value: "brands", label: "Brands / social content" },
-      { value: "weddings", label: "Weddings + commercial" },
-      { value: "corporate", label: "Corporate / events" },
-      { value: "agency", label: "Agency with a team" },
-      { value: "other", label: "Other" },
+      { value: "real-estate", label: "Real Estate/Buyers Agents" },
+      { value: "construction", label: "Construction & Trades" },
+      { value: "personal-brands", label: "Personal Brands" },
+      { value: "automotive", label: "Automotive" },
+      { value: "weddings", label: "Weddings / Commercial" },
+      { value: "corporate", label: "Corporate / Events" },
+      { write: true, placeholder: "Something else? Type it here" },
     ] },
     { id: "blocker", title: "What's the biggest thing holding you back right now?", options: [
       { value: "offer", label: "My offer: competing on price, one-off jobs" },
@@ -295,16 +300,29 @@ function renderQuestion() {
     (qIndex > 0 ? `<button class="back" type="button" id="back">Back</button>` : "");
   body.querySelector(".q").textContent = q.title;
   const opts = body.querySelector(".opts");
+  const advance = (value) => {
+    answers[q.id] = value;
+    if (qIndex < n - 1) qIndex++; else view = "details";
+    render();
+  };
   q.options.forEach((o) => {
+    if (o.write) {
+      const row = document.createElement("form");
+      row.className = "write";
+      row.innerHTML = `<input type="text" maxlength="100" aria-label="Your industry"><button class="opt go" type="submit" disabled>Continue</button>`;
+      const input = row.querySelector("input");
+      const go = row.querySelector("button");
+      input.placeholder = o.placeholder;
+      input.addEventListener("input", () => { go.disabled = !input.value.trim(); });
+      row.addEventListener("submit", (e) => { e.preventDefault(); if (input.value.trim()) advance(input.value.trim()); });
+      opts.appendChild(row);
+      return;
+    }
     const b = document.createElement("button");
     b.type = "button";
     b.className = "opt";
     b.textContent = o.label;
-    b.addEventListener("click", () => {
-      answers[q.id] = o.value;
-      if (qIndex < n - 1) qIndex++; else view = "details";
-      render();
-    });
+    b.addEventListener("click", () => advance(o.value));
     opts.appendChild(b);
   });
   const back = $("back");

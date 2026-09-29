@@ -27,7 +27,7 @@ module.exports = {
   // funnels send Kit the same values. Kit field names on the right of each map's use in api/*.js.
   labels: {
     revenue: { "under-3k": "Just starting / under $3K", "3k-10k": "$3K-$10K", "10k-20k": "$10K-$20K", "20k-50k": "$20K-$50K", "50k-plus": "$50K+" },
-    work: { "real-estate": "Real estate", brands: "Brands / social content", weddings: "Weddings + commercial", corporate: "Corporate / events", agency: "Agency with a team", other: "Other" },
+    work: { "real-estate": "Real Estate/Buyers Agents", construction: "Construction & Trades", "personal-brands": "Personal Brands", automotive: "Automotive", weddings: "Weddings / Commercial", corporate: "Corporate / Events" },
     blocker: { offer: "Offer / competing on price, one-off jobs", clients: "Getting clients consistently", delivery: "Delivery: I'm the bottleneck, no team", retainers: "Retainers don't stick or scale", "not-sure": "Not sure, that's why I'm booking" },
     leads: { referrals: "Referrals / word of mouth", organic: "Organic social", "paid-ads": "Paid ads", cold: "Cold outreach", repeat: "Repeat clients", none: "No steady source" },
     goal: { "10k-20k": "$10K-$20K", "20k-50k": "$20K-$50K", "50k-85k": "$50K-$85K ($1M a year)", "85k-plus": "$85K+" },
