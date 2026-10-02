@@ -3,5 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "description": "One-screen ProfitX application page: headline, one video, apply, then book a Gameplan Call.",
-  "engines": { "node": "20.x || 22.x || 24.x" }
+  "engines": {
+    "node": "20.x || 22.x || 24.x"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  }
 }
