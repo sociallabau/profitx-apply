@@ -12,6 +12,7 @@ const { parseApplication } = require("./_lib/application");
 const { upsertSubscriber, tag } = require("./_lib/kit");
 const { sendLead } = require("./_lib/meta");
 const { emailApplication } = require("./_lib/notify");
+const crypto = require("crypto");
 
 async function postJson(url, body) {
   const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -40,6 +41,10 @@ module.exports = async function handler(req, res) {
   if (app.honeypot) return res.status(200).json({ ok: true });
   if (!app.valid) return res.status(400).json({ ok: false, error: "invalid" });
 
+  // One Meta event id per email: if someone submits more than once, Meta dedupes the repeats
+  // (same event_name + event_id within 48h) and Ads Manager counts them as one lead.
+  app.eventId = "lead-" + crypto.createHash("sha256").update(app.email).digest("hex").slice(0, 32);
+
   console.log("APPLICATION", JSON.stringify({ ...app, receivedAt: new Date().toISOString() }));
 
   const configured = !!(process.env.KIT_API_KEY || process.env.APPLICATION_WEBHOOK_URL);
@@ -64,5 +69,5 @@ module.exports = async function handler(req, res) {
   await Promise.all([sendLead(req, app), emailApplication(app)]);
   // A destination is set up but every one failed: let the page say so, so they can retry.
   if (configured && !delivered) return res.status(502).json({ ok: false, error: "delivery" });
-  return res.status(200).json({ ok: true });
+  return res.status(200).json({ ok: true, eventId: app.eventId });
 };

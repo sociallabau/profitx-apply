@@ -387,8 +387,8 @@ async function submitDetails(e) {
     const eventId = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2));
     const res = await post("/api/apply", { ...applicant, answers, source: location.search.slice(1, 300), eventId, eventSourceUrl: location.href.split("#")[0] });
     if (!res.ok) throw new Error();
-    await res.json();
-    track("Lead", eventId);
+    const out = await res.json();
+    track("Lead", out.eventId || eventId);
     view = "time";
     render();
   } catch {
