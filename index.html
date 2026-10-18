@@ -25,7 +25,7 @@
 
   /* One screen, no scroll: everything sits in a column that fills the viewport. */
   .screen{height:100dvh;display:flex;flex-direction:column;align-items:center;text-align:center;
-    padding:max(18px,env(safe-area-inset-top)) 20px max(14px,env(safe-area-inset-bottom));gap:clamp(10px,2.2dvh,22px)}
+    padding:max(32px,env(safe-area-inset-top)) 20px max(14px,env(safe-area-inset-bottom));gap:clamp(10px,2.2dvh,22px)}
   .brand{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:20px;letter-spacing:-.03em}
   .brand .mark{width:26px;height:26px;border-radius:8px;flex:none}
   .brand span{color:var(--violet)}
@@ -114,7 +114,7 @@
 
   /* Phones: stack everything tight instead of stretching the video across the leftover height. */
   @media (max-width:700px){
-    .screen{justify-content:center;gap:12px}
+    .screen{height:auto;min-height:100dvh;justify-content:center;gap:12px}
     .stage{flex:none;display:block;container-type:normal}
     .video{width:100%}
     .note{margin:-2px 0 0}
