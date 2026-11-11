@@ -44,11 +44,13 @@ module.exports = async function handler(req, res) {
     }).catch((e) => console.error("book: kit", e));
     await tag(app.email, process.env.KIT_TAG_BOOKED).catch((e) => console.error("book: kit tag", e));
     if (process.env.APPLICATION_WEBHOOK_URL) {
-      fetch(process.env.APPLICATION_WEBHOOK_URL, {
+      // `booking: true` tells the Google Script this is a booking notice, not a new lead, so it doesn't add a sheet row.
+      await fetch(process.env.APPLICATION_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: `${b.callTitle} booked: ${app.name} (${app.email}) at ${app.start}` }),
-      }).catch((e) => console.error("book: webhook", e));
+        body: JSON.stringify({ booking: true, name: app.name, email: app.email, start: app.start, text: `${b.callTitle} booked: ${app.name} (${app.email}) at ${app.start}` }),
+        signal: AbortSignal.timeout(4000),
+      }).catch((e) => console.error("book: webhook", e.message));
     }
     console.log("BOOKED", JSON.stringify({ name: app.name, email: app.email, start: app.start }));
     return res.status(200).json({ ok: true, meetLink, start: new Date(app.start).toISOString() });

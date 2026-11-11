@@ -13,7 +13,8 @@ function parseApplication(body) {
     phone: clean(src.phone, 30),
     business: clean(src.business, 200),
     source: clean(src.source, 300),
-    honeypot: clean(src.company, 50),
+    // Hidden spam-trap field. Named so browser autofill won't fill it (it used to be "company").
+    honeypot: clean(src.hp_extra, 50),
     start: clean(src.start, 40),
     eventId: clean(src.eventId, 64),
     eventSourceUrl: clean(src.eventSourceUrl, 300),

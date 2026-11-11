@@ -3,7 +3,7 @@
 // (falls back to Resend's shared sender, which only delivers to the Resend account owner).
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-async function emailApplication(app) {
+async function emailApplication(app, { sheetFailed = false } = {}) {
   const key = process.env.RESEND_API_KEY;
   if (!key) return false;
   const rows = [
@@ -12,7 +12,8 @@ async function emailApplication(app) {
     ["Leads from", app.leadsLabel], ["12-month goal", app.goalLabel], ["Urgency", app.urgencyLabel],
     ["Source", app.source],
   ];
-  const html = `<h2>New application: ${esc(app.name)}</h2><table cellpadding="6" style="border-collapse:collapse">` +
+  const warn = sheetFailed ? `<p style="color:#b00020"><b>This application did not save to the ProfitX Application sheet. Add it by hand.</b></p>` : "";
+  const html = `${warn}<h2>New application: ${esc(app.name)}</h2><table cellpadding="6" style="border-collapse:collapse">` +
     rows.map(([k, v]) => `<tr><td><b>${esc(k)}</b></td><td>${esc(v) || "-"}</td></tr>`).join("") + "</table>";
   try {
     const r = await fetch("https://api.resend.com/emails", {
@@ -22,7 +23,7 @@ async function emailApplication(app) {
         from: process.env.RESEND_FROM || "ProfitX Apply <onboarding@resend.dev>",
         to: [process.env.NOTIFY_EMAIL || "dan@danwilmott.com"],
         reply_to: app.email,
-        subject: `New application: ${app.name} (${app.revenueLabel || "no revenue given"})`,
+        subject: `${sheetFailed ? "[NOT IN SHEET] " : ""}New application: ${app.name} (${app.revenueLabel || "no revenue given"})`,
         html,
       }),
       signal: AbortSignal.timeout(5000),
