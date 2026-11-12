@@ -13,6 +13,10 @@ module.exports = {
   spotsPerDay: { min: 2, max: 4 },
   extraTimes: ["07:15", "19:30"],
   minNoticeHours: 2,
+  // One-off days where every free slot in the window is offered (no 2-4 daily pick, no extra times).
+  openDays: [
+    { date: "2026-11-13", start: "07:45", end: "16:00" },
+  ],
   callTitle: "Gameplan Call",
   // Never offered, even if the calendar is clear. days: 0 Sun ... 6 Sat. `from` + `everyWeeks` = fortnightly etc.
   blocked: [
