@@ -128,11 +128,15 @@ async function openSlots() {
     if (!b.days.includes(wd)) continue;
     const blocks = blockedOn(y, m, d, wd);
     const ok = (t) => t >= earliest && !clash(t, blocks);
+    const pad = (n) => String(n).padStart(2, "0");
+    const open = (b.openDays ?? []).find((x) => x.date === `${y}-${pad(m)}-${pad(d)}`);
     const grid = [];
-    for (let t = atLocal(y, m, d, b.startHour, 0); t + b.slotMinutes * MIN <= atLocal(y, m, d, b.endHour, 0); t += (b.slotMinutes + b.bufferMinutes) * MIN) grid.push(t);
-    const extras = b.extraTimes.map((x) => atLocal(y, m, d, ...hm(x))).filter(ok);
+    const [sh, sm] = hm(open ? open.start : `${b.startHour}:00`);
+    const [eh, em] = hm(open ? open.end : `${b.endHour}:00`);
+    for (let t = atLocal(y, m, d, sh, sm); t + b.slotMinutes * MIN <= atLocal(y, m, d, eh, em); t += (b.slotMinutes + b.bufferMinutes) * MIN) grid.push(t);
+    const extras = open ? [] : b.extraTimes.map((x) => atLocal(y, m, d, ...hm(x))).filter(ok);
     // Keep the full grid for ranking, so the daily pick doesn't depend on what's booked.
-    if (grid.some(ok) || extras.length) days.push({ key: `${y}-${m}-${d}`, blocks, grid, extras });
+    if (grid.some(ok) || extras.length) days.push({ key: `${y}-${m}-${d}`, blocks, grid, extras, all: !!open });
   }
   const all = days.flatMap((x) => [...x.grid, ...x.extras]).filter((t) => t >= earliest);
   if (!all.length) return [];
@@ -146,7 +150,7 @@ async function openSlots() {
   const out = [];
   for (const day of days) {
     const free = (t) => t >= earliest && !clash(t, busy) && !clash(t, day.blocks);
-    out.push(...pickDay(day.key, day.grid, free), ...day.extras.filter(free));
+    out.push(...(day.all ? day.grid.filter(free) : pickDay(day.key, day.grid, free)), ...day.extras.filter(free));
   }
   return out.sort((a, z) => a - z).map((t) => new Date(t).toISOString());
 }

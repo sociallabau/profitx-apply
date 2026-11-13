@@ -18,14 +18,14 @@
     --font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%;overflow:hidden}
+  html,body{margin:0}
   body{background:var(--canvas);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
   button{font:inherit;cursor:pointer}
   :focus-visible{outline:3px solid var(--violet);outline-offset:3px}
 
   /* One screen, no scroll: everything sits in a column that fills the viewport. */
   .screen{height:100dvh;display:flex;flex-direction:column;align-items:center;text-align:center;
-    padding:max(18px,env(safe-area-inset-top)) 20px max(14px,env(safe-area-inset-bottom));gap:clamp(10px,2.2dvh,22px)}
+    padding:max(32px,env(safe-area-inset-top)) 20px max(14px,env(safe-area-inset-bottom));gap:clamp(10px,2.2dvh,22px)}
   .brand{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:20px;letter-spacing:-.03em}
   .brand .mark{width:26px;height:26px;border-radius:8px;flex:none}
   .brand span{color:var(--violet)}
@@ -36,6 +36,12 @@
 
   /* The video takes whatever height is left and keeps 16:9. */
   .stage{flex:1;min-height:0;width:100%;display:grid;place-items:center;container-type:size}
+  /* The "what happens" box sits under the button, so the video keeps its full first-screen
+     height (viewport minus the header and button) and the box can run just below the fold. */
+  @media (min-width:701px){
+    .screen{height:auto;min-height:100dvh}
+    .stage{flex:none;height:max(300px,calc(100dvh - 440px))}
+  }
   .video{width:min(100cqw,calc(100cqh * 16 / 9));aspect-ratio:16/9;border-radius:14px;overflow:hidden;position:relative;
     background:radial-gradient(120% 90% at 30% 20%,#2b1a44 0%,var(--ink) 70%);
     box-shadow:0 18px 50px rgba(40,28,12,.22);display:grid;place-items:center;color:var(--white)}
@@ -57,6 +63,13 @@
   .note{margin:-4px 0 0;font-size:13px;color:var(--muted);font-weight:500}
   .legal{font-size:11.5px;color:var(--muted)}
   .legal a{color:inherit}
+
+  /* What happens when you apply: a small reassurance box right under the button. */
+  .inside{width:100%;max-width:520px;text-align:left;background:var(--paper);border-radius:12px;padding:12px 16px 10px}
+  .inside h2{margin:0 0 6px;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+  .inside ul{margin:0;padding-left:1.1em;color:var(--body);font-weight:500;font-size:13.5px;line-height:1.4}
+  .inside li{margin-bottom:3px}
+  .inside .sign{margin:6px 0 0;font-size:13.5px;font-weight:700;color:var(--ink)}
 
   /* Application pop-up */
   .modal-bg{position:fixed;inset:0;background:rgba(22,16,20,.72);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
@@ -101,7 +114,7 @@
 
   /* Phones: stack everything tight instead of stretching the video across the leftover height. */
   @media (max-width:700px){
-    .screen{justify-content:center;gap:12px}
+    .screen{height:auto;min-height:100dvh;justify-content:center;gap:12px}
     .stage{flex:none;display:block;container-type:normal}
     .video{width:100%}
     .note{margin:-2px 0 0}
@@ -125,8 +138,20 @@
 
   <button class="cta" id="apply" type="button">Apply now <span class="arr" aria-hidden="true">→</span></button>
   <p class="note" id="note"></p>
+  <section class="inside" aria-labelledby="inside-title">
+    <h2 id="inside-title">What Happens When You Apply</h2>
+    <ul>
+      <li>You'll fill in some deets to let me know where you're at</li>
+      <li>It'll ask a time that suits to chat</li>
+      <li>I'll ask you who you help, how you get clients, what you offer, where you're at and where you want to go</li>
+      <li>If I feel like you could fit in well with the ProfitX crew I'll give you an invite link</li>
+      <li>I fucking hate being on sales calls, and doing them myself - this is a chat to find out where you're at and where you want to go.</li>
+    </ul>
+    <p class="sign">Talk soon, Dan</p>
+  </section>
   <div class="legal"><a id="privacy" href="#">Privacy</a> · <a id="terms" href="#">Terms</a></div>
 </main>
+
 
 <div class="modal-bg" id="modal" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="q-title">
@@ -389,7 +414,7 @@ async function submitDetails(e) {
     if (!res.ok) throw new Error();
     const out = await res.json();
     // The server flags submissions it threw away (spam trap), so those never count as a Meta lead.
-    if (!out.dropped) track("Lead", eventId);
+    if (!out.dropped) track("Lead", out.eventId || eventId);
     view = "time";
     render();
   } catch {
