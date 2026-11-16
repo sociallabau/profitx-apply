@@ -25,6 +25,9 @@ module.exports = {
     { days: [3], start: "07:00", end: "09:00", from: "2026-09-30", everyWeeks: 2 },
   ],
 
+  // Revenue answers that can't book a call (the page shows them a different message instead of the calendar).
+  noBooking: ["under-3k"],
+
   // Revenue answers that get a call ($10K+ a month, same cut-off as the workshop funnel).
   qualified: ["10k-20k", "20k-50k", "50k-plus"],
 

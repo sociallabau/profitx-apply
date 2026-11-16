@@ -1,6 +1,6 @@
 // Books a Gameplan Call (step 2): re-checks the slot is still free, creates the Google Calendar event
 // with a Meet link (Google emails the invite), then tags the person "booked" in Kit.
-// Every applicant can book — revenue is collected as info on the lead, not a gate.
+// Everyone can book except revenue answers listed in config.noBooking (the page shows them a message instead).
 const { parseApplication } = require("./_lib/application");
 const { isStillFree, bookCall } = require("./_lib/calendar");
 const { upsertSubscriber, tag } = require("./_lib/kit");
@@ -14,6 +14,8 @@ module.exports = async function handler(req, res) {
   if (!app.valid || !app.start || Number.isNaN(Date.parse(app.start))) {
     return res.status(400).json({ error: "Pick a time and check your details." });
   }
+
+  if (b.noBooking.includes(app.revenue)) return res.status(403).json({ error: "Booking isn't available for this application." });
 
   try {
     if (!(await isStillFree(app.start))) {
