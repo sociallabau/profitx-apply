@@ -10,7 +10,7 @@
 // extra info on the lead (it also picks which Kit tag they get).
 const { parseApplication } = require("./_lib/application");
 const { upsertSubscriber, tag } = require("./_lib/kit");
-const { sendLead, eventNameFor } = require("./_lib/meta");
+const { sendLead } = require("./_lib/meta");
 const { emailApplication } = require("./_lib/notify");
 const crypto = require("crypto");
 
@@ -95,5 +95,5 @@ module.exports = async function handler(req, res) {
   await Promise.all([sendLead(req, app), emailApplication(app, { sheetFailed })]);
   // A destination is set up but every one failed: let the page say so, so they can retry.
   if (configured && !delivered) return res.status(502).json({ ok: false, error: "delivery" });
-  return res.status(200).json({ ok: true, eventId: app.eventId, eventName: eventNameFor(app) });
+  return res.status(200).json({ ok: true, eventId: app.eventId });
 };

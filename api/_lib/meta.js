@@ -1,13 +1,9 @@
-// Meta Conversions API (server-side Lead event). Applicants who can't book (config.noBooking) are sent as the
-// custom event LowQualityLead instead, so ads optimised for "Lead" only chase people in higher revenue brackets. Pairs with the browser pixel: both send the same
+// Meta Conversions API (server-side Lead event). Pairs with the browser pixel: both send the same
 // event_id, so Meta counts one lead, not two. Needs META_PIXEL_ID + META_CAPI_TOKEN; without them it does nothing.
 const crypto = require("crypto");
-const b = require("./config");
 
 const sha = (v) => crypto.createHash("sha256").update(String(v)).digest("hex");
 const cookie = (req, name) => (req.headers.cookie || "").split(/;\s*/).find((c) => c.startsWith(name + "="))?.slice(name.length + 1);
-
-const eventNameFor = (app) => (b.noBooking.includes(app.revenue) ? "LowQualityLead" : "Lead");
 
 async function sendLead(req, app) {
   const pixel = process.env.META_PIXEL_ID, token = process.env.META_CAPI_TOKEN;
@@ -25,7 +21,7 @@ async function sendLead(req, app) {
     fbc: cookie(req, "_fbc") || app.fbc || undefined,
   };
   const event = {
-    event_name: eventNameFor(app),
+    event_name: "Lead",
     event_time: Math.floor(Date.now() / 1000),
     event_id: app.eventId || undefined,
     action_source: "website",
@@ -44,4 +40,4 @@ async function sendLead(req, app) {
   }
 }
 
-module.exports = { sendLead, eventNameFor };
+module.exports = { sendLead };

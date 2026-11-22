@@ -297,9 +297,7 @@ if (CONFIG.pixelId) {
   fbq("init", CONFIG.pixelId);
   fbq("track", "PageView");
 }
-// Standard events use "track"; anything else (e.g. LowQualityLead) is a custom event.
-const STANDARD_EVENTS = ["Lead", "Schedule", "PageView"];
-const track = (name, eventID) => { if (window.fbq) fbq(STANDARD_EVENTS.includes(name) ? "track" : "trackCustom", name, {}, eventID ? { eventID } : undefined); };
+const track = (name, eventID) => { if (window.fbq) fbq("track", name, {}, eventID ? { eventID } : undefined); };
 
 // ---- modal
 const modal = $("modal");
@@ -449,7 +447,7 @@ async function submitDetails(e) {
     if (!res.ok) throw new Error();
     const out = await res.json();
     // The server flags submissions it threw away (spam trap), so those never count as a Meta lead.
-    if (!out.dropped) track(out.eventName || "Lead", out.eventId || eventId);
+    if (!out.dropped) track("Lead", out.eventId || eventId);
     view = CONFIG.text.notFit.revenue.includes(answers.revenue) ? "notfit" : "time";
     render();
   } catch {
